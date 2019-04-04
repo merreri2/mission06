@@ -1,36 +1,21 @@
 package edu.isu.cs.cs3308;
 
 import edu.isu.cs.cs3308.structures.impl.HashSet;
+import edu.isu.cs.cs3308.structures.impl.SpellChecker;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Driver {
 
     public static void main(String[] args) throws IOException {
-
-        File f = new File("data/en-US.dic");
-        LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(f));
-        lineNumberReader.skip(Long.MAX_VALUE);
-        int lines = lineNumberReader.getLineNumber();
-        lineNumberReader.close();
-
-        HashSet<String> dictionary = new HashSet<>(lines);
-
-        BufferedReader reader;
-
-
-            reader = new BufferedReader(new FileReader(f));
-            String l = reader.readLine();
-            while (l != null){
-                dictionary.add(l);
-                l = reader.readLine();
-            }
-            reader.close();
-
             boolean loop = true;
+
 
             while (loop){
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -44,12 +29,30 @@ public class Driver {
                     String[] sentToCheck = str.split(" ");
                     String results = "";
                     for (int i = 0; i < sentToCheck.length; i++){
-                        if (!dictionary.contains(sentToCheck[i])){
-                            results += "Misspelled word: " + sentToCheck[i] + "\r\n";
+                        List<String> l = new ArrayList<>();
+                        SpellChecker sc = new SpellChecker();
+                        l = sc.check(sentToCheck[i].toLowerCase());
+                        Iterator<String> it = l.iterator();
+                        if (l.size() == 1 && l.contains(sentToCheck[i].toLowerCase())){
+                            //Do nothing
+                        } else if (l.size() > 5) {
+                            results += "Misspelled word: " + sentToCheck[i] + " May I suggest: \r\n";
+                            for (int j = 0; j < 5; j ++){
+                                results += it.next() + "\r\n";
+                            }
+                        } else {
+                            results += "Misspelled word: " + sentToCheck[i] + " May I suggest: \r\n";
+                            while (it.hasNext()){
+                                results += it.next() + "\r\n";
+                            }
                         }
                     }
 
-                    System.out.print(results);
+                    if (!results.equals("")) {
+                        System.out.print(results);
+                    } else {
+                        System.out.print("No misspellings found!\r\n");
+                    }
                 }
             }
 
